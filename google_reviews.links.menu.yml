@@ -1,0 +1,5 @@
+google_review.settings:
+  route_name: google_review.settings
+  title: 'Google Reviews'
+  description: 'Administer Google Reviews'
+  parent: commerce.configuration

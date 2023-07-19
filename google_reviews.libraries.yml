@@ -1,0 +1,13 @@
+google_reviews:
+  css:
+    theme:
+      css/reviews.css: { }
+  js:
+    https://apis.google.com/js/platform.js?onload=renderBadge: { type: external, minified: false }
+    https://apis.google.com/js/platform.js?onload=renderOptIn.: { type: external, minified: false }
+    js/custom.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/drupalSettings
+

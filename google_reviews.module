@@ -1,0 +1,173 @@
+<?php
+
+
+function google_reviews_theme($existing, $type, $theme, $path)
+{
+  return [
+    'block--google-reviews' => [
+      'variables' => [
+        'form' => [],
+      ],
+    ],
+  ];
+}
+
+function google_reviews_library_info_build() {
+
+  $config = \Drupal::config('google_reviews.settings');
+  $api_key = $config->get('google_reviews.api_key');
+
+  $libraries = [];
+
+  $libraries['google_reviews_js'] = [
+    'version' => '1.x',
+    'header' => true,
+    'js' => [
+      'https://apis.google.com/js/platform.js?onload=renderBadge' => [
+        'type' => 'external',
+        'minified' => true,
+        'attributes' => [
+          'key' => "$api_key",
+          'defer' => true,
+          'async' => true,
+        ],
+      ],
+    ],
+    'js' => [
+      'https://apis.google.com/js/platform.js?onload=renderOptIn' => [
+        'type' => 'external',
+        'minified' => true,
+        'attributes' => [
+          'key' => "$api_key",
+          'async' => "async",
+        ],
+      ],
+    ],
+  ];
+
+  return $libraries;
+}
+
+function google_reviews_preprocess_page(&$variables)
+{
+    $route_match = \Drupal::routeMatch();
+    $view_id = $route_match->getParameter('view_id');
+    $display_id = $route_match->getParameter('display_id');
+
+  $base_url = \Drupal::request()->getSchemeAndHttpHost();
+  $is_fr = substr($base_url, -3);
+  $is_pt = substr($base_url, -3);
+  $is_de = substr($base_url, -3);
+  $is_shop = substr($base_url, -5);
+
+//if ($view_id != 'commerce_order_item_table' && $display_id == 'default'){
+
+  $product = '';
+  $parameter = \Drupal::routeMatch()->getParameter('commerce_product');
+  if(isset($parameter)) {
+    $id = \Drupal\commerce_product\Entity\Product::load((int)$parameter->id())->getVariationIds()[0];
+    $product = \Drupal::entityTypeManager()->getStorage('commerce_product_variation')->load($id)->get('price')->getValue()[0]["number"];
+  }
+
+  $orders = \Drupal::routeMatch()->getParameter('commerce_order');
+  if (isset($orders) && (\Drupal::routeMatch()->getRouteName() !== "view.commerce_order_payments.page_1")){
+    $orders = $orders->order_id->value;
+  }
+  /*$user_id = \Drupal::currentUser()->id();
+  $orders = \Drupal::entityTypeManager()->getStorage('commerce_order')->loadByProperties(['uid' => $user_id]);
+ // $orders = $orders[count($orders) - 1];
+  $order = json_encode($orders);
+  $order = substr($order, -7);
+  $order = str_replace ( "{", '', $order);
+  $order = str_replace ( "}", '', $order);
+  $order = str_replace ( ":", '', $order);
+  $order = str_replace ( '"', '', $order);
+  $order =(int)$order;
+*/
+
+  $request = \Drupal::service('request_stack')->getCurrentRequest();
+  $requestUri = $request->getRequestUri();
+  $complete = (substr($requestUri, -9));
+
+  $form = \Drupal::formBuilder()->getForm('Drupal\google_reviews\Form\GoogleReviewsForm');
+if (isset($form) && isset($orders)){
+  $google_review = $form['enabled']['#value'];
+  if($is_fr == ".fr"){
+    $merchant = $form['merchant_settings']['merchant_id_fr']['#value'];
+  }/*elseif($is_pt ==".pt"){
+      $merchant = $form['merchant_settings']['merchant_id_pt']['#value'];
+    }elseif($is_de ==".de"){
+      $merchant = $form['merchant_settings']['merchant_id_de']['#value'];
+    }elseif($is_shop ==".shop"){
+      $merchant = $form['merchant_settings']['merchant_id_shop']['#value'];
+    }*/else{
+    $merchant = $form['merchant_settings']['merchant_id']['#value'];
+  }
+  $badge_position = $form['badge_settings']['badge_position']['#value'];
+  $opt_in_location = $form['review_settings']['opt_in_location']['#value'];
+  $estimated_shipping_days = $form['review_settings']['estimated_shipping_days']['#value'];
+  $estimated_shipping_days_exclude_weekends = $form['review_settings']['estimated_shipping_days_exclude_weekends']['#value'];
+
+  // user email
+  $user = \Drupal::currentUser();
+  $user_email = $user->getEmail();
+
+  $datos = array (
+    'google_review' => $google_review,           //0 o 1
+    'merchand_id' => $merchant,                                //valor numerico
+    'badge_position' => $badge_position,                  //"BOTTOM_RIGHT", "BOTTOM_LEFT", "INLINE"
+    'opt_in_location' => $opt_in_location,                            //"CENTER_DIALOG"
+    'estimated_shipping_days' => $estimated_shipping_days,                    //valor numerico
+    'estimated_shipping_days_exclude_weekends' => $estimated_shipping_days_exclude_weekends,
+    'producto' => $product,
+    'order' => $orders,
+    'email' => $user_email,
+    'completado' => $complete
+  );
+}else if(isset($form)){
+  $google_review = $form['enabled']['#value'];
+  if($is_fr == ".fr"){
+    $merchant = $form['merchant_settings']['merchant_id_fr']['#value'];
+  }/*elseif($is_pt ==".pt"){
+      $merchant = $form['merchant_settings']['merchant_id_pt']['#value'];
+    }elseif($is_de ==".de"){
+      $merchant = $form['merchant_settings']['merchant_id_de']['#value'];
+    }elseif($is_shop ==".shop"){
+      $merchant = $form['merchant_settings']['merchant_id_shop']['#value'];
+    }*/else{
+    $merchant = $form['merchant_settings']['merchant_id']['#value'];
+  }
+  $badge_position = $form['badge_settings']['badge_position']['#value'];
+  $opt_in_location = $form['review_settings']['opt_in_location']['#value'];
+  $estimated_shipping_days = $form['review_settings']['estimated_shipping_days']['#value'];
+  $estimated_shipping_days_exclude_weekends = $form['review_settings']['estimated_shipping_days_exclude_weekends']['#value'];
+  $datos = array (
+    'google_review' => $google_review,           //0 o 1
+    'merchand_id' => $merchant,                                //valor numerico
+    'badge_position' => $badge_position,                  //"BOTTOM_RIGHT", "BOTTOM_LEFT", "INLINE"
+    'opt_in_location' => $opt_in_location,                            //"CENTER_DIALOG"
+    'estimated_shipping_days' => $estimated_shipping_days,                    //valor numerico
+    'estimated_shipping_days_exclude_weekends' => $estimated_shipping_days_exclude_weekends,
+    'producto' => '',
+    'order' => '',
+    'email' => '',
+    'completado' => $complete
+  );
+}else {
+  $datos = array (
+    'google_review' => '',
+    'merchand_id' => '',
+    'badge_position' => '',
+    'opt_in_location' => '',
+    'estimated_shipping_days' => '',
+    'estimated_shipping_days_exclude_weekends' => '',
+    'producto' => '',
+    'order' => '',
+    'email' => '',
+    'completado' => $complete
+  );
+}
+  $variables['#attached']['library'][] = 'google_reviews/custom-js';
+  $variables['#attached']['drupalSettings']['google_reviews']['total']['datos']= $datos;
+}
+//}

@@ -1,0 +1,18 @@
+google_reviews.settings:
+  type: mapping
+  label: Configuración
+  mapping:
+    google_reviews_enabled:
+      type: integer
+    google_reviews_exclude_weekends:
+      type: integer
+    google_reviews_merchant_id:
+      type: integer
+    google_reviews_estimated_shipping_days:
+      type: integer
+    google_reviews_badge_location:
+      type: string
+    google_reviews_opt_in_location:
+      type: string
+    google_reviews_estimated_shipping_days_exclude_weekends:
+      type: integer

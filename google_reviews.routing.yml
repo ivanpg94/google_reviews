@@ -1,0 +1,15 @@
+google_review.settings:
+  path: /admin/commerce/config/google_reviews
+  defaults:
+    _title: 'Google Reviews'
+    _form: \Drupal\google_reviews\Form\GoogleReviewsForm
+  requirements:
+    _permission: 'administer google reviews'
+
+google_reviews.getform:
+  path: /admin/commerce/config/getform
+  defaults:
+    _title: 'Google Reviews'
+    _form: \Drupal\google_reviews\Form\getform
+  requirements:
+    _permission: 'administer google reviews'

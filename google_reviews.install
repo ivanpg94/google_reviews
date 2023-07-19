@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Install and uninstall file.
+ */
+
+/**
+ * Implements hook_uninstall().
+ *
+ * Delete all variables set in Drupal.
+ */
+function google_reviews_uninstall() {
+\Drupal::configFactory()->getEditable('google_reviews.settings')->clear('google_reviews_enabled')->save();
+    \Drupal::configFactory()->getEditable('google_reviews.settings')->clear('google_reviews_merchant_id')->save();
+    \Drupal::configFactory()->getEditable('google_reviews.settings')->clear('google_reviews_badge_location')->save();
+    \Drupal::configFactory()->getEditable('google_reviews.settings')->clear('google_reviews_opt_in_location')->save();
+    \Drupal::configFactory()->getEditable('google_reviews.settings')->clear('google_reviews_estimated_shipping_days')->save();
+    \Drupal::configFactory()->getEditable('google_reviews.settings')->clear('google_reviews_estimated_shipping_days_exclude_weekends')->save();
+
+}
